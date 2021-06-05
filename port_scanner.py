@@ -1,5 +1,6 @@
 import socket
 import common_ports
+import re
 
 def portSCanner(host, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,8 +26,10 @@ def get_open_ports(target, port_range, verbose = False):
     try:
         ip = socket.gethostbyname(target)
     except socket.gaierror as e:
-        if e.errno == -2:
+        if (e.errno == 8 or e.errno == -2) and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", target):
             return 'Error: Invalid IP address'
+        else:
+            return 'Error: Invalid hostname'
 
     try:
         domain = socket.gethostbyaddr(target)[0]
@@ -34,9 +37,6 @@ def get_open_ports(target, port_range, verbose = False):
     except socket.herror as e:
         if e.errno == 1:
             print('IP address has no DNS record')
-    except socket.gaierror as e:
-        if e.errno == -2:
-            return 'Error: Invalid hostname'
 
     open_ports = []
 
